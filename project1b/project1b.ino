@@ -20,6 +20,52 @@ BOTTOM  2
 LEFT  3
 */
 
+
+
+ int A[8][8] = {
+{0,1,1,1,1,1,1,0},
+{1,0,0,0,0,0,0,1},
+{1,0,1,0,0,1,0,1},
+{1,0,0,0,0,0,0,1},
+{1,0,0,0,0,0,0,1},
+{1,0,0,1,1,0,0,1},
+{1,0,0,0,0,0,0,1},
+{0,1,1,1,1,1,1,0}
+};
+
+ int B[8][8] = {
+{0,1,1,1,1,1,1,0},
+{1,0,0,0,0,0,0,1},
+{1,0,1,0,0,1,0,1},
+{1,0,0,0,0,0,0,1},
+{1,0,0,0,0,0,0,1},
+{1,0,1,1,1,1,0,1},
+{1,0,0,0,0,0,0,1},
+{0,1,1,1,1,1,1,0}
+};
+
+ int C[8][8] = {
+{0,1,1,1,1,1,1,0},
+{1,0,0,0,0,0,0,1},
+{1,0,1,0,0,1,0,1},
+{1,0,0,0,0,0,0,1},
+{1,0,1,0,0,1,0,1},
+{1,0,1,1,1,1,0,1},
+{1,0,0,0,0,0,0,1},
+{0,1,1,1,1,1,1,0}
+};
+
+ int D[8][8] = {
+{0,1,1,1,1,1,1,0},
+{1,0,0,0,0,0,0,1},
+{1,0,1,0,0,1,0,1},
+{1,0,0,0,0,0,0,1},
+{1,0,1,0,0,1,0,1},
+{1,0,0,1,1,0,0,1},
+{1,0,0,0,0,0,0,1},
+{0,1,1,1,1,1,1,0}
+};
+
  int head[8][8] = {
 {0,1,1,1,1,1,1,0},
 {1,0,0,0,0,0,0,1},
@@ -42,13 +88,35 @@ LEFT  3
 {1,1,0,0,0,0,1,1}
 };
 
+void smile() {
+  for (int j = 0; j < 4; ++j ) {
+  for (int i = 0 ; i < 250; ++i) {
+  drawScreen(A);
+  }
+  for (int i = 0 ; i < 250; ++i) {
+  drawScreen(B);
+  }
+  for (int i = 0 ; i < 250; ++i) {
+  drawScreen(C);
+  }
+  for (int i = 0 ; i < 250; ++i) {
+  drawScreen(D);
+  }
+  }
+}
+
 void skull() {
+   // Draw the skull to show death.
+  for (int j = 0; j < 4; ++j) {
+ 
   for (int i = 0 ; i < 1000; ++i) {
   drawScreen(head);
   }
   for (int i = 0 ; i < 1000; ++i) {
   drawScreen(x);
   }
+  }
+  delay(500);
 }
 
 // Snake
@@ -74,26 +142,17 @@ unsigned long delayTime = 500;                     // Game step in ms
 int pointX, pointY;
 unsigned long pointPrevTime = 0;
 unsigned long pointBlinkTime = 1000/250;
-int pointLed = LED_ON;
+
 
 //Reset the game to start again.
 void reset() {
-  delay(500);
-  skull();
-  skull();
-  skull();
-  skull();
-  delay(500);
   direction = random(0,4)  ;                            // direction of movement
   buttonState = LOW;
   timeCount = 0;
   snakeLength = 1;                               
   buttonRead = false;                        // is button already read 
   prevTime = 0;                        // for gamedelay (ms)
-  delayTime = 500;                     // Game step in ms
-  pointPrevTime = 0;
-  pointBlinkTime = 1000/250;
-  pointLed = LED_ON;
+
   clear();
     snakeX[0] = random(1, 6);
     snakeY[0] = random(1, 6);
@@ -143,6 +202,7 @@ void loop() {
   checkButtons();
   unsigned long currentTime = millis();
   if(currentTime - prevTime >= delayTime){
+    clear();
     nextstep(); 
     buttonRead = false;
     prevTime = currentTime;
@@ -167,6 +227,7 @@ void checkButtons(){
 void draw(){
   clear();
   drawSnake();
+  clear();
   drawpoint();
 }
 
@@ -207,25 +268,25 @@ void nextstep(){
     case 0:
       snakeY[0] = snakeY[0]-1;
       //reset if snake goes beyond top row
-      if (snakeY[0] < 0 ) { reset();
+      if (snakeY[0] < 0 ) { skull();reset();
       }
       break;
     case 1:
       snakeX[0] = snakeX[0]+1;
             //reset if snake goes beyond rightest column
-      if (snakeX[0] > 7 ) { reset();
+      if (snakeX[0] > 7 ) { skull();reset();
       }
       break;
     case 2:
       snakeY[0] = snakeY[0]+1;
             //reset if snake goes beyond bottom row
-       if (snakeY[0] > 7 ) { reset();
+       if (snakeY[0] > 7 ) { skull();reset();
       }
       break;
     case 3:
       snakeX[0]=snakeX[0]-1;
             //reset if snake goes beyond leftest column
-      if (snakeX[0] < 0 ) { reset();
+      if (snakeX[0] < 0 ) { skull();reset();
       }
       break;
   }
@@ -234,13 +295,12 @@ void nextstep(){
   if((snakeX[0] == pointX) && (snakeY[0] == pointY)){
     snakeLength++;
     // make new point if the snake is not max.
-    if(snakeLength < MAX_SNAKE_LENGTH){     
-      clear();  
+    if(snakeLength < MAX_SNAKE_LENGTH){      
       newPoint();
     } 
     else {
-      pointX = pointY = -1;
-      clear();     
+      pointX = pointY = -1;  
+      smile();  
       reset();
     }
   }
