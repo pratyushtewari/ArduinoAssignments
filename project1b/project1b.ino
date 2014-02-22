@@ -88,7 +88,12 @@ LEFT  3
 {1,1,0,0,0,0,1,1}
 };
 
+unsigned long prevTime = 0;                        // for gamedelay (ms)
+unsigned long delayTime = 500;                     // Game step in ms
+
 void smile() {
+  //speed up the game because you crossed a level
+  delayTime /= 2;
   for (int j = 0; j < 4; ++j ) {
   for (int i = 0 ; i < 250; ++i) {
   drawScreen(A);
@@ -136,8 +141,7 @@ int snakeLength = 1;
 
 boolean buttonRead = false;                        // is button already read 
 
-unsigned long prevTime = 0;                        // for gamedelay (ms)
-unsigned long delayTime = 500;                     // Game step in ms
+
 
 int pointX, pointY;
 unsigned long pointPrevTime = 0;
@@ -146,6 +150,7 @@ unsigned long pointBlinkTime = 1000/250;
 
 //Reset the game to start again.
 void reset() {
+  delayTime = 500;
   direction = random(0,4)  ;                            // direction of movement
   buttonState = LOW;
   timeCount = 0;
@@ -294,6 +299,7 @@ void nextstep(){
   // if snakes meets the point
   if((snakeX[0] == pointX) && (snakeY[0] == pointY)){
     snakeLength++;
+     tone(20, 208,250);
     // make new point if the snake is not max.
     if(snakeLength < MAX_SNAKE_LENGTH){      
       newPoint();
