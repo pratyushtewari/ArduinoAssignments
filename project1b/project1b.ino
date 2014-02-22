@@ -1,3 +1,8 @@
+/*
+Arduino Snake 
+by Pratyush Tewari
+*/
+
 #define LED_ON 1
 #define LED_OFF 0
 // 2-dimensional array of row pin numbers:
@@ -5,25 +10,57 @@ const int row[8] = {18,17,12,7,11,5,4,15};
 // 2-dimensional array of column pin numbers:
 const int col[8] = {10,16,9,14,2,8,3,6};
 
-
-
 // Button pin
 const int button_Pin = 19;
 
+/* the int defines the direction the snake will move
+TOP  0
+RIGHT 1
+BOTTOM  2
+LEFT  3
+*/
 
+ int head[8][8] = {
+{0,1,1,1,1,1,1,0},
+{1,0,0,0,0,0,0,1},
+{1,0,1,0,0,1,0,1},
+{1,0,0,1,1,0,0,1},
+{0,1,0,0,0,0,1,0},
+{0,1,0,1,1,0,1,0},
+{0,0,1,0,0,1,0,0},
+{0,0,1,1,1,1,0,0}
+};
 
-// direction
-const int TOP    = 0;
-const int RIGHT  = 1;
-const int BOTTOM = 2;
-const int LEFT   = 3;
+ int x[8][8] ={
+{1,1,0,0,0,0,1,1},
+{1,1,0,0,0,0,1,1},
+{0,0,1,0,0,1,0,0},
+{0,0,0,1,1,0,0,0},
+{0,0,0,1,1,0,0,0},
+{0,0,1,0,0,1,0,0},
+{1,1,0,0,0,0,1,1},
+{1,1,0,0,0,0,1,1}
+};
+
+void skull() {
+  for (int i = 0 ; i < 1000; ++i) {
+  drawScreen(head);
+  }
+  for (int i = 0 ; i < 1000; ++i) {
+  drawScreen(x);
+  }
+}
 
 // Snake
 const int MAX_SNAKE_LENGTH = 10;
 
-int direction = TOP;                               // direction of movement
+int direction = 0;                               // direction of movement
 int buttonState = LOW;
 float timeCount = 0;
+
+// snakeX[i] = "number" mean the x co-ordinates of the snake where the LED's are on.
+// snakeX[i] = -1 mean the x co-ordinates of the snake where the LED's are off.
+
 int snakeX[MAX_SNAKE_LENGTH];                      // X-coordinates of snake
 int snakeY[MAX_SNAKE_LENGTH];                      // Y-coordinates of snake
 int snakeLength = 1;                               
@@ -39,9 +76,15 @@ unsigned long pointPrevTime = 0;
 unsigned long pointBlinkTime = 1000/250;
 int pointLed = LED_ON;
 
-
+//Reset the game to start again.
 void reset() {
-  direction = TOP;                               // direction of movement
+  delay(500);
+  skull();
+  skull();
+  skull();
+  skull();
+  delay(500);
+  direction = random(0,4)  ;                            // direction of movement
   buttonState = LOW;
   timeCount = 0;
   snakeLength = 1;                               
@@ -52,8 +95,8 @@ void reset() {
   pointBlinkTime = 1000/250;
   pointLed = LED_ON;
   clear();
-    snakeX[0] = 4;
-    snakeY[0] = 6;
+    snakeX[0] = random(1, 6);
+    snakeY[0] = random(1, 6);
     for(int i=1; i<MAX_SNAKE_LENGTH; i++){
       snakeX[i] = snakeY[i] = -1;
     }
@@ -62,6 +105,7 @@ void reset() {
 
 
 void setup() {
+  direction = random(0,4)  ; 
   Serial.begin(9600);
   Serial.println("Game is started");
   //pinMode(speakerOut, OUTPUT);
@@ -77,17 +121,16 @@ void setup() {
   }
 
   // init snake
-  snakeX[0] = 4;
-  snakeY[0] = 6;
+      snakeX[0] = random(1, 6);
+    snakeY[0] = random(1, 6);
   for(int i=1; i<MAX_SNAKE_LENGTH; i++){
     snakeX[i] = snakeY[i] = -1;
   }
-
   newPoint();
   
 }
 
-
+//Clear the LED Matrix
 void clear (){
   for (int thisPin = 0; thisPin < 8; thisPin++) {
     digitalWrite(row[thisPin], HIGH); 
@@ -114,7 +157,7 @@ void checkButtons(){
      if(buttonClicked()){
       direction++;
       if(direction > 3){
-        direction = TOP;
+        direction = 0;
       }
     }
     buttonRead = (currentDirection != direction);
@@ -138,24 +181,15 @@ void drawSnake(){
 }
 
 void drawpoint(){
-  if(inPlayField(pointX, pointY)){
-    unsigned long currenttime = millis();
-    if(currenttime - pointPrevTime >= pointBlinkTime){
-      pointLed = (pointLed == LED_ON) ? LED_OFF : LED_ON;
-      pointPrevTime = currenttime;
-     
-    }
-     if(pointLed) {
-      digitalWrite(row[pointX], LOW); 
-      digitalWrite(col[pointY], HIGH);
-      } else {
-      digitalWrite(row[pointX], HIGH); 
-      digitalWrite(col[pointY], LOW);
-      }
-    
-  }
+    digitalWrite(row[pointX], LOW); 
+    digitalWrite(col[pointY], HIGH);
+     delay(.025);
+    digitalWrite(row[pointX], HIGH); 
+    digitalWrite(col[pointY], LOW);
 }
 
+
+// check if the number is within the LED matrix coordinates
 boolean inPlayField(int x, int y){
   return (x>=0) && (x<8) && (y>=0) && (y<8);
 }
@@ -168,19 +202,31 @@ void nextstep(){
     snakeY[i] = snakeY[i-1];
   }
   
-  //Based on the direction, change the value of the pixel.
+  //Based on the , change the value of the pixel.
   switch(direction){
-    case TOP:
+    case 0:
       snakeY[0] = snakeY[0]-1;
+      //reset if snake goes beyond top row
+      if (snakeY[0] < 0 ) { reset();
+      }
       break;
-    case RIGHT:
+    case 1:
       snakeX[0] = snakeX[0]+1;
+            //reset if snake goes beyond rightest column
+      if (snakeX[0] > 7 ) { reset();
+      }
       break;
-    case BOTTOM:
+    case 2:
       snakeY[0] = snakeY[0]+1;
+            //reset if snake goes beyond bottom row
+       if (snakeY[0] > 7 ) { reset();
+      }
       break;
-    case LEFT:
+    case 3:
       snakeX[0]=snakeX[0]-1;
+            //reset if snake goes beyond leftest column
+      if (snakeX[0] < 0 ) { reset();
+      }
       break;
   }
 
@@ -188,13 +234,13 @@ void nextstep(){
   if((snakeX[0] == pointX) && (snakeY[0] == pointY)){
     snakeLength++;
     // make new point if the snake is not max.
-    if(snakeLength < MAX_SNAKE_LENGTH){      
+    if(snakeLength < MAX_SNAKE_LENGTH){     
+      clear();  
       newPoint();
     } 
     else {
       pointX = pointY = -1;
-      clear();
-      delay(2000);
+      clear();     
       reset();
     }
   }
@@ -239,6 +285,21 @@ boolean buttonClicked(){
   }
   buttonState = state; 
   return buttonClick;
+}
+
+void drawScreen(int character[8][8]) {
+  for(int i = 0; i < 8; i++) {    
+    for (int j = 0; j < 8; j++) {
+      if ( character[i][j] == 1) {
+      // draw some letter bits
+       digitalWrite(col[j], HIGH);
+       digitalWrite(row[i], LOW);
+       delay(.025);
+       digitalWrite(col[j], LOW);
+       digitalWrite(row[i], HIGH);
+      }
+    }
+  }
 }
 
 
