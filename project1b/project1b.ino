@@ -21,7 +21,7 @@ LEFT  3
 */
 
 
-
+//A B C D are used to animate the smiley
  int A[8][8] = {
 {0,1,1,1,1,1,1,0},
 {1,0,0,0,0,0,0,1},
