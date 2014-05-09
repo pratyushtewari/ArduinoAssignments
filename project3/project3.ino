@@ -1,3 +1,10 @@
+// Hydrometer sensor for plants
+// By Pratyush Tewari
+
+//number of LEDS to light up
+int leds=0;
+
+
 
 
 // 2-dimensional array of row pin numbers:
@@ -33,6 +40,7 @@ int K[8][8] = {
 }; 
 
 void setup() {
+  Serial.begin(9600);
   // initialize the I/O pins as outputs
   // iterate over the pins:
   for (int thisPin = 0; thisPin < 8; thisPin++) {
@@ -45,15 +53,48 @@ void setup() {
 }
 
 void loop() {
-for (int i = 0 ; i < 1000; ++i) {
-drawScreen(O);
-}
-for (int i = 0 ; i < 1000; ++i) {
-drawScreen(K);
-}
+
+
+// read the input on analog pin 0:
+  int sensorValue = analogRead(A6);
+    
+  sensorValue = constrain(sensorValue, 0, 730);
+  // print out the value you read:
+  //Serial.println(sensorValue);
+
+  //map the value to a percentage
+  leds = map(sensorValue, 0, 730, 1, 64);
+  
+  // print out the soil water percentage you calculated:
+  Serial.println(leds);
+  
+ for (int delay = 0; delay < 500; ++delay) {
+  drawLEDS(leds);
+ }
+
+  
 
 }
 
+//Light up number of LEDS
+void drawLEDS(int leds) {
+  boolean complete = false;
+  for(int i = 0; i < 8 && !complete; i++) {    
+    for (int j = 0; j < 8; j++) {
+      if (--leds <= 0 ) {
+        complete = true;
+        break;
+      }
+       digitalWrite(col[j], HIGH);
+       digitalWrite(row[i], LOW);
+       //delay(.999);
+       digitalWrite(col[j], LOW);
+       digitalWrite(row[i], HIGH);
+      
+    }
+  }
+  
+}
 void drawScreen(int character[8][8]) {
   for(int i = 0; i < 8; i++) {    
     for (int j = 0; j < 8; j++) {
@@ -61,7 +102,7 @@ void drawScreen(int character[8][8]) {
       // draw some letter bits
        digitalWrite(col[j], HIGH);
        digitalWrite(row[i], LOW);
-       delay(.025);
+       //delay(.999);
        digitalWrite(col[j], LOW);
        digitalWrite(row[i], HIGH);
       }
